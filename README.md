@@ -10,7 +10,8 @@ If you’ve used **tactile** on Linux, this brings the same spatial, muscle-memo
 ## Demo
 
 A short demo video is included in this repository that shows the full workflow end-to-end:
-![[demo/Screen Recording.mov]]
+
+![](demo/tiling-window.gif)
 
 * Triggering the grid overlay
 * Selecting grid cells using characters
