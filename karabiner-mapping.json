@@ -1,0 +1,34 @@
+{
+    "description": "Change F3 x2 to F18",
+    "manipulators": [
+        {
+            "conditions": [
+                {
+                    "expression": "right_shift_x2_expiration > system.now.milliseconds",
+                    "type": "expression_if"
+                }
+            ],
+            "from": {
+                "key_code": "f3",
+                "modifiers": { "optional": ["any"] }
+            },
+            "to": [{ "key_code": "f18" }],
+            "type": "basic"
+        },
+        {
+            "from": {
+                "key_code": "f3",
+                "modifiers": { "optional": ["any"] }
+            },
+            "to": [
+                {
+                    "set_variable": {
+                        "expression": "system.now.milliseconds + 300",
+                        "name": "right_shift_x2_expiration"
+                    }
+                }
+            ],
+            "type": "basic"
+        }
+    ]
+}
