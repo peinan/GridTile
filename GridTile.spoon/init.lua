@@ -37,6 +37,14 @@ local layouts = {
 -- Current layout (can be changed via obj:setLayout())
 obj.currentLayout = "vim"
 
+-- Gap settings: 0 = none, 1 = small, 2 = normal
+local gapSizes = {
+    [0] = 0,
+    [1] = 5,
+    [2] = 10
+}
+obj.gap = 2
+
 local selectionStart = {
     x1 = nil,
     x2 = nil,
@@ -175,8 +183,8 @@ function obj:start()
     local rowWeights = layout.rows
     local letters = layout.keys
 
-    -- Padding between grid cells
-    local padding = 10
+    -- Get gap size
+    local padding = gapSizes[obj.gap] or gapSizes[2]
 
     -- Calculate the size of each grid cell
     local dWidth = (frame.w - (padding * (#columnWeights - 1 + 2))) / (sum(columnWeights)) -- extra 2 for left and right padding
@@ -317,6 +325,15 @@ function obj:setLayout(name)
         print("[GridTile] Layout set to: " .. name)
     else
         print("[GridTile] Unknown layout: " .. name .. ". Available: default, vim")
+    end
+end
+
+function obj:setGap(level)
+    if gapSizes[level] then
+        obj.gap = level
+        print("[GridTile] Gap set to: " .. level .. " (" .. gapSizes[level] .. "px)")
+    else
+        print("[GridTile] Unknown gap level: " .. level .. ". Available: 0, 1, 2")
     end
 end
 
