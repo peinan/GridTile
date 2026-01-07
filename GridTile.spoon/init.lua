@@ -8,6 +8,35 @@ local isActive = false
 
 obj.gridMode = nil
 
+-- Layout definitions
+local layouts = {
+    default = {
+        columns = {1, 2, 3, 3, 3, 3, 2, 1},
+        rows = {1, 2, 3, 2, 1},
+        keys = {
+            "1", "2", "3", "4", "7", "8", "9", "0",
+            "q", "w", "e", "r", "u", "i", "o", "p",
+            "Q", "W", "E", "R", "U", "I", "O", "P",
+            "a", "s", "d", "f", "j", "k", "l", ";",
+            "z", "x", "c", "v", "n", "m", ",", "."
+        }
+    },
+    vim = {
+        columns = {1, 2, 3, 3, 3, 3, 2, 1},
+        rows = {1, 2, 3, 2, 1},
+        keys = {
+            "Q", "W", "E", "R", "U", "I", "O", "P",
+            "q", "w", "e", "r", "u", "i", "o", "p",
+            "a", "s", "d", "f", "j", "k", "l", ";",
+            "z", "x", "c", "v", "m", ",", ".", "/",
+            "Z", "X", "C", "V", "M", "<", ">", "?"
+        }
+    }
+}
+
+-- Current layout (can be changed via obj:setLayout())
+obj.currentLayout = "vim"
+
 local selectionStart = {
     x1 = nil,
     x2 = nil,
@@ -140,22 +169,11 @@ function obj:start()
     canvas = hs.canvas.new(frame)
     canvas:show()
 
-    -- Define the grid weights
-    -- =========================
-    -- USER CONFIGURATION START
-    -- =========================
-    local columnWeights = {1, 2, 3, 3, 3, 3, 2, 1}
-    local rowWeights = {1, 2, 3, 2, 1}
-
-    -- lua-format off
-    local letters = {
-      "1", "2", "3", "4", "7", "8", "9", "0", 
-      "q", "w", "e", "r", "u", "i", "o", "p", 
-      "Q", "W", "E", "R", "U", "I", "I", "P", 
-      "a", "s", "d", "f", "j", "k", "l", ";", 
-      "z", "x", "c", "v", "n", "m", ",", "."
-    }
-    -- lua-format on
+    -- Get current layout
+    local layout = layouts[obj.currentLayout] or layouts.vim
+    local columnWeights = layout.columns
+    local rowWeights = layout.rows
+    local letters = layout.keys
 
     -- Padding between grid cells
     local padding = 10
@@ -266,8 +284,19 @@ function obj:start()
                 end
             end
 
+            -- Handle key bindings (uppercase and special shift characters)
+            local shiftKeys = {
+                ["<"] = ",", [">"] = ".", ["?"] = "/",
+                [":"] = ";", ['"'] = "'", ["{"] = "[", ["}"] = "]",
+                ["!"] = "1", ["@"] = "2", ["#"] = "3", ["$"] = "4",
+                ["%"] = "5", ["^"] = "6", ["&"] = "7", ["*"] = "8",
+                ["("] = "9", [")"] = "0", ["_"] = "-", ["+"] = "="
+            }
+
             if key:match("%u") then
                 obj.gridMode:bind({"shift"}, key:lower(), fn)
+            elseif shiftKeys[key] then
+                obj.gridMode:bind({"shift"}, shiftKeys[key], fn)
             else
                 obj.gridMode:bind({}, key, fn)
             end
@@ -280,6 +309,23 @@ function obj:start()
     end
 
     obj.gridMode:enter()
+end
+
+function obj:setLayout(name)
+    if layouts[name] then
+        obj.currentLayout = name
+        print("[GridTile] Layout set to: " .. name)
+    else
+        print("[GridTile] Unknown layout: " .. name .. ". Available: default, vim")
+    end
+end
+
+function obj:getLayouts()
+    local names = {}
+    for name, _ in pairs(layouts) do
+        table.insert(names, name)
+    end
+    return names
 end
 
 return obj
