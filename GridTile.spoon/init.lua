@@ -235,8 +235,18 @@ function obj:start()
             local cellY1 = y
             local cellY2 = y + rowSize
             local key = letters[letterIndex]
+            -- Each cell has 2 canvas elements (rectangle + text)
+            local rectIndex = (letterIndex - 1) * 2 + 1
 
             local fn = function()
+                -- Highlight selected cell
+                canvas[rectIndex].fillColor = {
+                    red = 0.2,
+                    green = 0.5,
+                    blue = 1,
+                    alpha = 0.5
+                }
+
                 if not selectionStart.isSet then
                     selectionStart = {
                         x1 = cellX1,
