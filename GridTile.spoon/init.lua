@@ -3,8 +3,10 @@ obj.__index = obj
 
 local canvas = nil
 local menuBarHeight = nil
+local screenOffset = { x = 0, y = 0 }
+local isActive = false
 
-obj.gridMode = hs.hotkey.modal.new()
+obj.gridMode = nil
 
 local selectionStart = {
     x1 = nil,
@@ -55,14 +57,31 @@ local function getRect(a, b)
 end
 
 local function exitGridTile()
+    if not isActive then return end
+
     canvas:hide()
-    obj.gridMode:exit() -- 🔑 THIS restores normal keyboard behavior
+    canvas:delete()
+    canvas = nil
+
+    obj.gridMode:exit()
+    obj.gridMode = nil
+
     selectionStart = {
         isSet = false
     }
     selectionEnd = {
         isSet = false
     }
+
+    isActive = false
+    print("[GridTile] Exited")
+
+    -- Restart the eventtap watcher to fix the issue where it stops working
+    hs.timer.doAfter(0.1, function()
+        if restartGridTileWatcher then
+            restartGridTileWatcher()
+        end
+    end)
 end
 
 local function handleSelection(startCell, endCell)
@@ -74,8 +93,8 @@ local function handleSelection(startCell, endCell)
     end
 
     win:setFrame({
-        x = rect.x1,
-        y = rect.y1 + menuBarHeight,
+        x = rect.x1 + screenOffset.x,
+        y = rect.y1 + screenOffset.y,
         w = rect.w,
         h = rect.h
     })
@@ -86,8 +105,16 @@ local function handleSelection(startCell, endCell)
 end
 
 function obj:start()
+    -- Prevent multiple activations
+    if isActive then
+        print("[GridTile] Already active, ignoring start()")
+        return
+    end
+    isActive = true
+    print("[GridTile] Started")
 
-    -- hs.alert.show("GridTile activated")
+    -- Create a fresh modal each time to avoid duplicate bindings
+    obj.gridMode = hs.hotkey.modal.new()
 
     local screen = hs.screen.mainScreen()
 
@@ -105,6 +132,11 @@ function obj:start()
 
     -- Draw a canvas on the screen
     local frame = screen:frame()
+
+    -- Save screen offset for multi-monitor support
+    screenOffset.x = frame.x
+    screenOffset.y = frame.y
+
     canvas = hs.canvas.new(frame)
     canvas:show()
 
