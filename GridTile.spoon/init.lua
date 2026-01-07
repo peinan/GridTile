@@ -66,7 +66,6 @@ local function exitGridTile()
 end
 
 local function handleSelection(startCell, endCell)
-    -- hs.alert.show("Start x: " .. startCell.x1 .. " | End x: " .. endCell.x1)
     local rect = getRect(startCell, endCell)
 
     local win = hs.window.focusedWindow()
@@ -97,11 +96,7 @@ function obj:start()
 
     menuBarHeight = frame.y - fullFrame.y
 
-    -- obj.gridMode = hs.hotkey.modal.new()
-
-    -- Bind the escape key to exit the grid mode
     obj.gridMode:bind({}, "escape", function()
-        -- hs.alert.show("Grid cancelled")
         exitGridTile()
     end)
 
@@ -112,9 +107,6 @@ function obj:start()
     local frame = screen:frame()
     canvas = hs.canvas.new(frame)
     canvas:show()
-
-    -- canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
-    -- canvas:mouseCallback(function() end)
 
     -- Define the grid weights
     -- =========================
@@ -197,8 +189,6 @@ function obj:start()
                 },
 
                 textAlignment = "center",
-                -- textVerticalAlignment = "center",
-
                 frame = {
                     x = x,
                     y = y + rowSize / 2.5,
@@ -223,10 +213,7 @@ function obj:start()
                         y2 = cellY2,
                         isSet = true
                     }
-                    -- hs.alert.show("Start: " .. key .. " @ x=" .. cellX1, 1)
-
                 else
-                    -- hs.alert.show("End: " .. key .. " @ x=" .. cellX1, 1)
                     selectionEnd = {
                         x1 = cellX1,
                         x2 = cellX2,
@@ -250,23 +237,7 @@ function obj:start()
 
     end
 
-    -- Start keybindings
     obj.gridMode:enter()
-
-    -- local x = padding
-    -- for i, colSize in ipairs(columnSizes) do
-    -- local y = padding
-    -- for j, rowSize in ipairs(rowSizes) do
-    -- canvas:appendElements({
-    -- type = "rectangle",
-    -- action = "stroke",
-    -- strokeColor = { red = 1, green = 1, blue = 1, alpha = 0.5 },
-    -- strokeWidth = 1,
-    -- frame = { x = x, y = y, w = colSize, h = rowSize }
-    -- })
-    -- y = y + rowSize + padding -- Move to the next row position
-    -- end
-    -- x = x + colSize + padding -- Move to the next column position
-    -- end
 end
+
 return obj
