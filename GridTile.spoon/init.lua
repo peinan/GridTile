@@ -56,6 +56,10 @@ local gapSizes = {
 }
 obj.gap = 2
 
+-- Font settings
+obj.font = "Menlo"
+obj.fontSize = nil  -- nil = auto (40% of row height, max 64)
+
 local selectionStart = {
     x1 = nil,
     x2 = nil,
@@ -223,49 +227,49 @@ function obj:start()
     for i, rowSize in ipairs(rowSizes) do
         local x = padding
         for j, colSize in ipairs(columnSizes) do
+            local cornerRadius = padding > 0 and 12 or 0
             canvas:appendElements({
                 type = "rectangle",
-                action = "strokeAndFill",
-                strokeColor = {
-                    red = 1,
-                    green = 1,
-                    blue = 1,
-                    alpha = 0.5
-                },
+                action = "fill",
                 fillColor = {
-                    red = 0,
-                    green = 0,
-                    blue = 0,
-                    alpha = 0.3
+                    red = 0.1,
+                    green = 0.1,
+                    blue = 0.15,
+                    alpha = 0.75
                 },
                 roundedRectRadii = {
-                    xRadius = 10,
-                    yRadius = 10
+                    xRadius = cornerRadius,
+                    yRadius = cornerRadius
                 },
-                strokeWidth = 1,
                 frame = {
                     x = x,
                     y = y,
                     w = colSize,
                     h = rowSize
+                },
+                shadow = {
+                    blurRadius = 8,
+                    offset = { h = 2, w = 2 },
+                    color = { black = 1, alpha = 0.3 }
                 }
-            }, {
-                -- Text
+            })
+
+            local fontSize = obj.fontSize or math.min(rowSize * 0.4, 64)
+            canvas:appendElements({
                 type = "text",
                 text = letters[letterIndex],
-
-                textSize = 32,
+                textFont = obj.font,
+                textSize = fontSize,
                 textColor = {
                     white = 1,
-                    alpha = 0.9
+                    alpha = 0.85
                 },
-
                 textAlignment = "center",
                 frame = {
                     x = x,
-                    y = y + rowSize / 2.5,
+                    y = y + (rowSize - fontSize) / 2 - fontSize * 0.1,
                     w = colSize,
-                    h = rowSize
+                    h = fontSize * 1.2
                 }
             })
 
@@ -281,10 +285,10 @@ function obj:start()
             local fn = function()
                 -- Highlight selected cell
                 canvas[rectIndex].fillColor = {
-                    red = 0.2,
-                    green = 0.5,
+                    red = 0.3,
+                    green = 0.6,
                     blue = 1,
-                    alpha = 0.5
+                    alpha = 0.9
                 }
 
                 if not selectionStart.isSet then
@@ -348,6 +352,20 @@ function obj:setGap(level)
         print("[GridTile] Gap set to: " .. level .. " (" .. gapSizes[level] .. "px)")
     else
         print("[GridTile] Unknown gap level: " .. level .. ". Available: 0, 1, 2")
+    end
+end
+
+function obj:setFont(name, size)
+    if name then
+        obj.font = name
+        print("[GridTile] Font set to: " .. name)
+    end
+    if size then
+        obj.fontSize = size
+        print("[GridTile] Font size set to: " .. size)
+    elseif size == nil and not name then
+        obj.fontSize = nil
+        print("[GridTile] Font size set to: auto")
     end
 end
 
